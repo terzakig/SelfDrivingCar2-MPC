@@ -20,8 +20,8 @@ using CppAD::AD;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
  
-const double T = 8; // seconds look-ahead time horizon
-const size_t N = 33;
+const double T = 5; // seconds look-ahead time horizon
+const size_t N = 18;
 const double dt = T / N;
 const size_t x_start = 0;
 const size_t y_start = x_start + N;
@@ -32,7 +32,7 @@ const size_t epsi_start = cte_start + N;
 const size_t delta_start = epsi_start + N;
 const size_t a_start = delta_start + N - 1;
 
-
+const double v_ref = 20 * ( 1609.34 / 3600.0); 
 
 
 class FG_eval 
@@ -54,23 +54,23 @@ class FG_eval
     // The part of the cost based on the reference state.
     for (int i = 0; i < N; i++) 
     {
-      fg[0] += 10000*CppAD::pow(vars[cte_start + i] , 2);
-      fg[0] += 10000*CppAD::pow(vars[epsi_start + i] , 2);
-      fg[0] += 100*CppAD::pow(vars[v_start + i] - 50, 2);
+      fg[0] += 100*CppAD::pow(vars[cte_start + i] , 2);
+      fg[0] += 100 * CppAD::pow(vars[epsi_start + i] , 2);
+      fg[0] += CppAD::pow(vars[v_start + i] - v_ref, 2);
     }
 
     // Minimize the use of actuators.
     for (int i = 0; i < N - 1; i++) 
     {
       fg[0] +=  CppAD::pow(vars[delta_start + i], 2);
-      fg[0] +=  10500*CppAD::pow(vars[a_start + i] -0.8, 2);
+      fg[0] +=  CppAD::pow(vars[a_start + i], 2);
     }
 
     // Minimize the value gap between sequential actuations.
     for (int i = 0; i < N - 2; i++) 
     {
-      fg[0] += 1000* CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-      fg[0] += 10*CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+      fg[0] += 1000000*CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += 100 * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
 
     //
@@ -120,7 +120,7 @@ class FG_eval
       
       AD<double> df_n_1 = coeffs[1];
       for (int k = 2; k < coeffs.size(); k++)
-	df_n_1 += k * coeffs[k] * CppAD::pow(x_n_1, k);
+	df_n_1 += k * coeffs[k] * CppAD::pow(x_n_1, k-1);
       
       AD<double> psides_n_1 = CppAD::atan(df_n_1);
 
@@ -216,7 +216,7 @@ vector<double> MPC::Solve(const Eigen::VectorXd &state, const Eigen::VectorXd &c
   // NOTE: Feel free to change this to something else.
   for (int i = a_start; i < n_vars; i++) 
   {
-    vars_lowerbound[i] = 0.0;
+    vars_lowerbound[i] = -1.0;
     vars_upperbound[i] = 1.0;
   }
 

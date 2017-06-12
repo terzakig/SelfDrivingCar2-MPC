@@ -61,6 +61,7 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+	  v *= ( 1609.34 / 3600.0 );
 	  
 	  
 	  double delta = j[1]["steering_angle"];
@@ -78,8 +79,8 @@ int main() {
 	  
 	  // 1. Transforming the control points to the car's local frame (NOTE: WRT original pose reported by the simulator)
 	  pair<VectorXd, VectorXd> transformed = TransformPoints2Local(ptsx, ptsy, px, py, psi);
-	  VectorXd x_car = transformed.first;
-	  VectorXd y_car = transformed.second;
+	  VectorXd ptsx_car = transformed.first;
+	  VectorXd ptsy_car = transformed.second;
 	  
 	  // 2. Setup the initial state. NOTE: In local car coordinate frame (original pose reported by the simulator)
 	  double x_0 = cos(psi) * ( px_lat - px ) + sin(psi) * (py_lat - py);
@@ -88,7 +89,7 @@ int main() {
 	  double v_0 = v_lat;
 	  // Mow we need cte0 and epsi0. A good chance to fit the polynomial
 	  // Ok, now fit a polynomial on the LOCAL points
-	  VectorXd coeffs = polyfit(x_car, y_car, 3);
+	  VectorXd coeffs = polyfit(ptsx_car, ptsy_car, 3);
 	  
 	  // compute the orientation error
 	  double cte_0 = polyeval(coeffs, x_0) - y_0;
@@ -117,7 +118,7 @@ int main() {
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = -steer_value / deg2rad(45);
+          msgJson["steering_angle"] = -steer_value / deg2rad(25);
           msgJson["throttle"] = throttle_value; // less gidder with fixed throttle...
 
           //Display the MPC predicted trajectory 
@@ -143,10 +144,14 @@ int main() {
           vector<double> next_y_vals;
 
 	  // filling values 
-	  for (int i = 0; i < x_car.size(); i++) 
+	  for (int i = 0; i < ptsx_car.size(); i++) 
 	  {
-	    next_x_vals.push_back( x_car[i] );
-	    next_y_vals.push_back( y_car[i] );
+	    //next_x_vals.push_back(  cos(psi_0) * ( ptsx_car[i] - x_0 ) +  sin(psi_0) * ( ptsy_car[i] - y_0 ) );
+	    //next_y_vals.push_back( -sin(psi_0) * ( ptsx_car[i] - x_0 ) +  cos(psi_0) * ( ptsy_car[i] - y_0 ) );
+	      next_x_vals.push_back(ptsx_car[i]);
+	      next_y_vals.push_back(ptsy_car[i]);
+	      
+	    
 	  }
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
