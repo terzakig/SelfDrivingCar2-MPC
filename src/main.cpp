@@ -65,7 +65,9 @@ int main() {
 	  
 	  
 	  double delta = j[1]["steering_angle"];
+	  delta *= deg2rad(25);
 	  double acceleration = j[1]["throttle"];
+	  acceleration *= 1609.34 / 3600.0 / 3600.0;
 	  
 	  const double Lf = 2.67;
 

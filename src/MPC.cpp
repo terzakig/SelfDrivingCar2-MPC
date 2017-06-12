@@ -32,7 +32,7 @@ const size_t epsi_start = cte_start + N;
 const size_t delta_start = epsi_start + N;
 const size_t a_start = delta_start + N - 1;
 
-const double v_ref = 20 * ( 1609.34 / 3600.0); 
+const double v_ref = 30 * ( 1609.34 / 3600.0); 
 
 
 class FG_eval 
@@ -63,7 +63,7 @@ class FG_eval
     for (int i = 0; i < N - 1; i++) 
     {
       fg[0] +=  CppAD::pow(vars[delta_start + i], 2);
-      fg[0] +=  CppAD::pow(vars[a_start + i], 2);
+      fg[0] +=  20*CppAD::pow(vars[a_start + i], 2);
     }
 
     // Minimize the value gap between sequential actuations.
