@@ -19,5 +19,5 @@ cmake ..
 make
 ./mpc
 ```
-Then run the simulator in auto-driving mode. The simulator can be dowloaded from [here](https://github.com/udacity/self-driving-car-sim/releases).
+Then run the simulator in auto-driving mode. The simulator can be dowloaded from [here](https://github.com/udacity/self-driving-car-sim/releases) or [here](https://1drv.ms/u/s!AtmapBHRVgqWwRIJTN5wcj7Z3jhF?e=TaWho7).
 
